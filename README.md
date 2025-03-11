@@ -10,18 +10,11 @@ backend-celarates/
 │   └── schema.prisma     # Database schema definition
 ├── src/
 │   ├── config/           # Configuration files
-│   │   └── database.ts   # Database connection setup
 │   ├── controllers/      # Route controllers
 │   ├── middleware/       # Custom middleware
-│   │   └── timingMiddleware.ts  # Middleware for request timing
 │   ├── models/           # Schema definitions using Zod
-│   │   └── BookmarkSchema.ts    # Bookmark model schemas
 │   ├── routes/           # API route definitions
-│   │   ├── authRoutes.ts        # Authentication routes
-│   │   ├── bookmarkRoutes.ts    # Bookmark management routes
-│   │   └── categoryRoutes.ts    # Category management routes
 │   ├── services/         # Business logic implementation
-│   │   └── BookmarkService.ts   # Bookmark CRUD operations
 │   └── index.ts          # Application entry point
 ├── .env.example          # Example environment variables
 ├── biome.json            # Biome configuration
@@ -37,8 +30,6 @@ backend-celarates/
 - **PostgreSQL**: Open-source relational database
 - **JWT**: JSON Web Tokens for secure authentication
 - **Zod**: TypeScript-first schema validation with static type inference
-- **OpenAPI**: API documentation with Swagger UI
-- **Vitest**: Testing framework
 
 ## Local Setup
 
