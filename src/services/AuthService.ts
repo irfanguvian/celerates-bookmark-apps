@@ -8,7 +8,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secret-refresh';
 class AuthService {
     async register(userData: { email: string; firstName: string; lastName: string; password: string; retypePassword: string }) {
         // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await prisma.user.findFirst({
             where: { email: userData.email }
         });
 
@@ -57,7 +57,7 @@ class AuthService {
 
     async login(credentials: { email: string; password: string }) {
         // Find user
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
             where: { email: credentials.email }
         });
 
@@ -155,7 +155,7 @@ class AuthService {
             throw new Error('Invalid token');
         }
 
-        return prisma.user.findUnique({
+        return prisma.user.findFirst({
             where: { id: decoded.userId }
         });
     }

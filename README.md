@@ -187,11 +187,4 @@ All category endpoints require authentication.
 
 ## API DOCUMENTATION
 Postman - [Documentation](https://documenter.getpostman.com/view/14873468/2sAYk7Siqm)
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
+RFC Document - [Documentation](https://docs.google.com/document/d/1qIL8_7E9LZ6UD2XnnyeEuoGsL39DlvqwOz7KS1_wces/edit?usp=sharing)
