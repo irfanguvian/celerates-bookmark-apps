@@ -82,7 +82,7 @@ class BookmarkService {
         } as { title: string, description?: string, category: { connect: { id: string } } ,user: { connect: { id: string } }, tags: { create: { tag: { connect: { id: string } } }[] } };
 
         if(data.categoryId) {
-            createBookmarkArgs['category'] = {
+            createBookmarkArgs.category = {
                 connect: { id: data.categoryId }
             }
         }

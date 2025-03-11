@@ -1,13 +1,12 @@
 import prisma from '../config/database';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
-import { SignupUserHandlerParameterType } from '../dtos/UserDto';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secret-refresh';
 
 class AuthService {
-    async register(userData: SignupUserHandlerParameterType) {
+    async register(userData: { email: string; firstName: string; lastName: string; password: string; retypePassword: string }) {
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: userData.email }

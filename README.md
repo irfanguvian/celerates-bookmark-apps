@@ -12,7 +12,7 @@ backend-celarates/
 │   ├── config/           # Configuration files
 │   ├── controllers/      # Route controllers
 │   ├── middleware/       # Custom middleware
-│   ├── models/           # Schema definitions using Zod
+│   ├── schemas/           # Schema definitions using Zod
 │   ├── routes/           # API route definitions
 │   ├── services/         # Business logic implementation
 │   └── index.ts          # Application entry point
@@ -184,6 +184,9 @@ All category endpoints require authentication.
    ```
    DELETE /categories/:id
    ```
+
+## API DOCUMENTATION
+Postman - [Documentation](https://documenter.getpostman.com/view/14873468/2sAYk7Siqm)
 
 ## License
 
