@@ -1,32 +1,39 @@
-import { OpenAPIHono } from '@hono/zod-openapi';
-import BookmarkController from '../controllers/BookmarkController';
-import { zValidator } from '@hono/zod-validator';
-import { createBookmarkSchema, updateBookmarkSchema } from '../schemas/bookmarkSchemas';
-import { MiddlewareHandler } from 'hono';
+import { OpenAPIHono } from "@hono/zod-openapi";
+import { zValidator } from "@hono/zod-validator";
+import { MiddlewareHandler } from "hono";
+import BookmarkController from "../controllers/BookmarkController";
+import {
+	createBookmarkSchema,
+	updateBookmarkSchema,
+} from "../schemas/bookmarkSchemas";
 
 export function bookmarkRouteHandler(
-    bookmarkController: BookmarkController,
-    authMiddleware : MiddlewareHandler
+	bookmarkController: BookmarkController,
+	authMiddleware: MiddlewareHandler,
 ) {
-    const routes = new OpenAPIHono();
-    // Apply auth middleware to all bookmark routes
+	const routes = new OpenAPIHono();
+	// Apply auth middleware to all bookmark routes
 
-    routes.use('*', authMiddleware);
+	routes.use("*", authMiddleware);
 
-    // GET /bookmarks - List all bookmarks
-    routes.get("/", (c) => bookmarkController.getAllBookmarks(c));
+	// GET /bookmarks - List all bookmarks
+	routes.get("/", (c) => bookmarkController.getAllBookmarks(c));
 
-    // POST /bookmarks - Create a new bookmark
-    routes.post("/", zValidator('json', createBookmarkSchema), (c) => bookmarkController.createBookmark(c));
+	// POST /bookmarks - Create a new bookmark
+	routes.post("/", zValidator("json", createBookmarkSchema), (c) =>
+		bookmarkController.createBookmark(c),
+	);
 
-    // GET /bookmarks/:id - Retrieve a specific bookmark
-    routes.get('/:id', (c) => bookmarkController.getBookmarkById(c));
+	// GET /bookmarks/:id - Retrieve a specific bookmark
+	routes.get("/:id", (c) => bookmarkController.getBookmarkById(c));
 
-    // PUT /bookmarks/:id - Update a bookmark
-    routes.put('/:id', zValidator('json', updateBookmarkSchema), (c) => bookmarkController.updateBookmark(c));
+	// PUT /bookmarks/:id - Update a bookmark
+	routes.put("/:id", zValidator("json", updateBookmarkSchema), (c) =>
+		bookmarkController.updateBookmark(c),
+	);
 
-    // DELETE /bookmarks/:id - DELETE a bookmark
-    routes.delete('/:id', (c) => bookmarkController.deleteBookmark(c));
+	// DELETE /bookmarks/:id - DELETE a bookmark
+	routes.delete("/:id", (c) => bookmarkController.deleteBookmark(c));
 
-    return routes;
+	return routes;
 }
