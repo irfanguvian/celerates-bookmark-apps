@@ -1,22 +1,13 @@
-import prisma from '../config/database';
 import { HTTPException } from 'hono/http-exception';
+import { BookmarkCreateInput, BookmarkUpdateInput, IBookmarkService, QueryParamBookmarkFilter } from '../entities/BookmarkService';
+import { Bookmark, PrismaClient } from '@prisma/client';
 
-interface BookmarkCreateInput {
-    title: string;
-    description?: string;
-    categoryId?: string;
-    tags?: string[];
-}
-
-interface BookmarkUpdateInput {
-    title?: string;
-    description?: string;
-    categoryId?: string;
-    tags?: string[];
-}
-
-class BookmarkService {
-    async getAllBookmarks(userId: string, queryParam: { limit?: number, offset?: number, search?: string, categoryId?: string}) {
+class BookmarkService implements IBookmarkService {
+    prisma: PrismaClient;
+    constructor(prisma: PrismaClient) {
+        this.prisma = prisma;
+    }
+    async getAllBookmarks(userId: string, queryParam: QueryParamBookmarkFilter) {
         const { limit = 10, offset = 0, search="", categoryId } = queryParam;
 
         const whereParam = {
@@ -31,8 +22,7 @@ class BookmarkService {
             whereParam.categoryId = categoryId;
         }
         
-
-        return prisma.bookmark.findMany({
+        const getBookmarks =  this.prisma.bookmark.findMany({
             where: whereParam,
             include: {
                 category: true,
@@ -45,14 +35,14 @@ class BookmarkService {
             skip: +offset,
             take: +limit,
             orderBy: { updatedAt: 'desc' }
-        });
+        }) as unknown as Promise<Bookmark[]>;
+
+        return getBookmarks;
     }
 
     async createBookmark(userId: string, data: BookmarkCreateInput) {
-        // Verify category if provided
-        console.log(userId)
         if (data.categoryId) {
-            const category = await prisma.category.findFirst({
+            const category = await this.prisma.category.findFirst({
                 where: {
                     id: data.categoryId,
                     userId
@@ -87,7 +77,7 @@ class BookmarkService {
             }
         }
         // Create bookmark
-        const bookmark = await prisma.bookmark.create({
+        const bookmark = await this.prisma.bookmark.create({
             data: createBookmarkArgs,
             include: {
                 category: true,
@@ -97,13 +87,13 @@ class BookmarkService {
                     }
                 }
             }
-        });
+        })  as Bookmark;
 
         return bookmark;
     }
 
     async getBookmarkById(userId: string, bookmarkId: string) {
-        const bookmark = await prisma.bookmark.findFirst({
+        const bookmark = await this.prisma.bookmark.findFirst({
             where: {
                 id: bookmarkId,
                 userId
@@ -122,12 +112,12 @@ class BookmarkService {
             throw new HTTPException(404, { message: 'Bookmark not found' });
         }
 
-        return bookmark;
+        return bookmark as Bookmark;
     }
 
     async updateBookmark(userId: string, bookmarkId: string, data: BookmarkUpdateInput) {
         // Check if bookmark exists and belongs to user
-        const existingBookmark = await prisma.bookmark.findFirst({
+        const existingBookmark = await this.prisma.bookmark.findFirst({
             where: {
                 id: bookmarkId,
                 userId
@@ -140,7 +130,7 @@ class BookmarkService {
 
         // Verify category if provided
         if (data.categoryId) {
-            const category = await prisma.category.findFirst({
+            const category = await this.prisma.category.findFirst({
                 where: {
                     id: data.categoryId,
                     userId
@@ -156,7 +146,7 @@ class BookmarkService {
         let tagsToConnect: string[] = [];
         if (data.tags) {
             // Remove existing tag connections
-            await prisma.tagOnBookmark.deleteMany({
+            await this.prisma.tagOnBookmark.deleteMany({
                 where: { bookmarkId }
             });
 
@@ -170,7 +160,7 @@ class BookmarkService {
             ...(data.categoryId !== undefined && { categoryId: data.categoryId })
         };
 
-        const bookmark = await prisma.bookmark.update({
+        const bookmark = await this.prisma.bookmark.update({
             where: { id: bookmarkId },
             data: {
                 ...updateData,
@@ -194,12 +184,12 @@ class BookmarkService {
             }
         });
 
-        return bookmark;
+        return bookmark as Bookmark;
     }
 
     async deleteBookmark(userId: string, bookmarkId: string) {
         // Check if bookmark exists and belongs to user
-        const bookmark = await prisma.bookmark.findFirst({
+        const bookmark = await this.prisma.bookmark.findFirst({
             where: {
                 id: bookmarkId,
                 userId
@@ -211,7 +201,7 @@ class BookmarkService {
         }
 
         // Delete the bookmark
-        await prisma.bookmark.delete({
+        await this.prisma.bookmark.delete({
             where: { id: bookmarkId }
         });
 
@@ -223,7 +213,7 @@ class BookmarkService {
 
         for (const tagName of tagNames) {
             // Find or create tag
-            const tag = await prisma.tag.upsert({
+            const tag = await this.prisma.tag.upsert({
                 where: { name: tagName.toLowerCase().trim() },
                 update: {},
                 create: { name: tagName.toLowerCase().trim() }
@@ -236,4 +226,4 @@ class BookmarkService {
     }
 }
 
-export const bookmarkService = new BookmarkService();
+export default BookmarkService;

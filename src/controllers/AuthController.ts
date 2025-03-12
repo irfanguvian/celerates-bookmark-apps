@@ -1,14 +1,19 @@
 import { Context } from 'hono';
-import { authService } from '../services/AuthService';
 import { errorResponse, successResponse } from '../utils/apiResponses';
+import { IAuthService } from '../entities/AuthService';
 
 class AuthController {
+    authService: IAuthService;
+    constructor(authService: IAuthService) {
+        this.authService = authService;
+    }
+
     async register(c: Context) {
         try {
             const body = await c.req.json();
-            const result = await authService.register(body);
-            return successResponse(c,result, 'User registered successfully');
-        } catch (error : any) {
+            const result = await this.authService.register(body);
+            return successResponse(c, result, 'User registered successfully');
+        } catch (error: any) {
             return errorResponse(c, error.message, error);
         }
     }
@@ -16,7 +21,7 @@ class AuthController {
     async login(c: Context) {
         try {
             const body = await c.req.json();
-            const result = await authService.login(body);
+            const result = await this.authService.login(body);
             return successResponse(c, result, 'User Login successfully');
         } catch (error: any) {
             return errorResponse(c, error.message, error);
@@ -26,7 +31,7 @@ class AuthController {
     async refreshToken(c: Context) {
         try {
             const body = await c.req.json();
-            const result = await authService.refreshToken(body.refreshToken);
+            const result = await this.authService.refreshToken(body.refreshToken);
             return successResponse(c, result, 'Refresh Token Generate successfully');
         } catch (error) {
             return errorResponse(c, 'Error occurred', error);
@@ -39,4 +44,4 @@ class AuthController {
     }
 }
 
-export const authController = new AuthController();
+export default AuthController

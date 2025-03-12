@@ -1,8 +1,8 @@
 import { Context, MiddlewareHandler } from 'hono'
-import { authService } from '../services/AuthService'
 import { errorResponse } from '../utils/apiResponses'
+import { IAuthService } from '../entities/AuthService'
 
-export const authMiddleware = (): MiddlewareHandler => {
+export const authMiddleware = (authService: IAuthService): MiddlewareHandler => {
     return async (c: Context, next) => {
         // Get the authorization header
         const authHeader = c.req.header('Authorization')

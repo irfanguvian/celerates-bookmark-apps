@@ -1,7 +1,9 @@
 import { Context } from 'hono';
-import { bookmarkController } from '../../controllers/BookmarkController';
-import { bookmarkService } from '../../services/BookmarkService';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
+import BookmarkController from '../../controllers/BookmarkController';
+import { IBookmarkService } from '../../entities/BookmarkService';
+import BookmarkService from '../../services/BookmarkService';
+import { prismaMock } from '../singleton';
 
 // Mock dependencies
 jest.mock('../../services/BookmarkService');
@@ -10,7 +12,8 @@ jest.mock('../../utils/apiResponses');
 describe('BookmarkController', () => {
     let mockContext: Partial<Context>;
     let mockReq: { json: jest.Mock; query: jest.Mock; param: jest.Mock };
-
+    let bookmarkController: BookmarkController;
+    let bookmarkService: IBookmarkService;
     beforeEach(() => {
         // Reset mocks
         jest.clearAllMocks();
@@ -31,6 +34,9 @@ describe('BookmarkController', () => {
 
         (successResponse as jest.Mock).mockReturnValue('success');
         (errorResponse as jest.Mock).mockReturnValue('error');
+
+        bookmarkService = new BookmarkService(prismaMock)
+        bookmarkController = new BookmarkController(bookmarkService);
     });
 
     describe('getAllBookmarks', () => {

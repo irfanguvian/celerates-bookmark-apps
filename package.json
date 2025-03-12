@@ -7,7 +7,7 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "test": "jest src/tests/*",
+        "test": "jest src/tests/* --detectOpenHandles",
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate dev",
         "prisma:push": "prisma db push"
@@ -36,6 +36,7 @@
         "@types/jsonwebtoken": "^9.0.9",
         "@types/node": "^20.9.0",
         "@types/supertest": "^6.0.2",
+        "jest-mock-extended": "2.0.4",
         "prisma": "^5.7.0",
         "tsx": "^3.12.7",
         "typescript": "^5.2.2"

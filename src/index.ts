@@ -4,13 +4,20 @@ import { prettyJSON } from 'hono/pretty-json'
 import prisma from './config/database'
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { swaggerUI } from '@hono/swagger-ui'
-
-import { authRoutes } from './routes/authRoutes'
-import { bookmarkRoutes } from './routes/bookmarkRoutes'
 import { timingMiddleware } from './middleware/timingMiddleware'
 import { cors } from 'hono/cors'
-import categoryRouter from './routes/categoryRoutes'
-
+import { categoryRouteHandler } from './routes/categoryRoutes'
+import AuthService from './services/AuthService'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import AuthController from './controllers/AuthController'
+import authRoutes from './routes/authRoutes'
+import BookmarkService from './services/BookmarkService'
+import BookmarkController from './controllers/BookmarkController'
+import { bookmarkRouteHandler } from './routes/bookmarkRoutes'
+import CategoryService from './services/CategoryService'
+import CategoryController from './controllers/CategoryController'
+import { authMiddleware } from './middleware/authMiddleware'
 const app = new OpenAPIHono()
 
 // Global middlewares
@@ -45,9 +52,24 @@ app.get('/docs', swaggerUI({ url: '/openapi.json' }))
 
 // Routes
 app.get('/', (c) => c.json({ message: 'Bookmark Management API' }))
-app.route('/api/auth', authRoutes)
+
+const initAuthService = new AuthService(prisma, bcrypt, jwt)
+const initAuthController = new AuthController(initAuthService)
+const AuthRoutes = authRoutes(initAuthController)
+app.route('/api/auth', AuthRoutes)
+
+const authMiddlewareHandler = authMiddleware(initAuthService)
+
+const initBookmarkService = new BookmarkService(prisma)
+const initBookmarkController = new BookmarkController(initBookmarkService)
+const bookmarkRoutes = bookmarkRouteHandler(initBookmarkController, authMiddlewareHandler)
 app.route('/api/bookmarks', bookmarkRoutes)
-app.route('/api/categories', categoryRouter)
+
+const initCategoryService = new CategoryService(prisma)
+const initCategoryController = new CategoryController(initCategoryService)
+const categoryRoutes = categoryRouteHandler(initCategoryController, authMiddlewareHandler)
+
+app.route('/api/categories', categoryRoutes)
 
 
 // 404 handler for undefined routes

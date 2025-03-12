@@ -1,14 +1,23 @@
-import prisma from '../config/database';
-import { compare, hash } from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+import { IAuthService, LoginRequest, RegisterRequest } from '../entities/AuthService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secret-refresh';
 
-class AuthService {
-    async register(userData: { email: string; firstName: string; lastName: string; password: string; retypePassword: string }) {
+class AuthService implements IAuthService {
+    prisma: PrismaClient;
+    bcrypt: any;
+    jwt: any;
+    constructor(prisma: PrismaClient, bcrypt: any, jwt: any) {
+        this.prisma = prisma;
+        this.bcrypt = bcrypt;
+        this.jwt = jwt;
+    }
+
+
+    async register(userData: RegisterRequest) {
         // Check if user already exists
-        const existingUser = await prisma.user.findFirst({
+        const existingUser = await this.prisma.user.findFirst({
             where: { email: userData.email }
         });
 
@@ -21,10 +30,10 @@ class AuthService {
         }
 
         // Hash the password
-        const hashedPassword = await hash(userData.password, 10);
+        const hashedPassword = await this.bcrypt.hash(userData.password, 10);
 
         // Create user
-        const user = await prisma.user.create({
+        const user = await this.prisma.user.create({
             data: {
                 email: userData.email,
                 firstName: userData.firstName,
@@ -38,13 +47,12 @@ class AuthService {
         const refreshToken = this.generateRefreshToken(user.id);
 
         // Save refresh token to database (optional but recommended)
-        await prisma.refreshToken.create({
+        await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
                 userId: user.id
             }
         });
-
         return {
             user: {
                 id: user.id,
@@ -55,9 +63,9 @@ class AuthService {
         };
     }
 
-    async login(credentials: { email: string; password: string }) {
+    async login(credentials: LoginRequest) {
         // Find user
-        const user = await prisma.user.findFirst({
+        const user = await this.prisma.user.findFirst({
             where: { email: credentials.email }
         });
 
@@ -66,7 +74,7 @@ class AuthService {
         }
 
         // Verify password
-        const validPassword = await compare(credentials.password, user.password);
+        const validPassword = await this.bcrypt.compare(credentials.password, user.password);
         if (!validPassword) {
             throw new Error('Invalid credentials');
         }
@@ -74,9 +82,8 @@ class AuthService {
         // Generate tokens
         const accessToken = this.generateAccessToken(user.id);
         const refreshToken = this.generateRefreshToken(user.id);
-
         // Save refresh token to database
-        await prisma.refreshToken.create({
+        await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
                 userId: user.id
@@ -93,14 +100,14 @@ class AuthService {
         };
     }
 
-    async refreshToken(token: string) {
+    async refreshToken(refreshToken: string) {
         try {
             // Verify the refresh token
-            const decoded = verify(token, JWT_REFRESH_SECRET) as { userId: string };
+            const decoded = this.bcrypt.verify(refreshToken, JWT_REFRESH_SECRET) as { userId: string };
 
             // Check if the token exists in the database
-            const refreshTokenRecord = await prisma.refreshToken.findFirst({
-                where: { token }
+            const refreshTokenRecord = await this.prisma.refreshToken.findFirst({
+                where: { token: refreshToken }
             });
 
             if (!refreshTokenRecord) {
@@ -112,11 +119,11 @@ class AuthService {
             const newRefreshToken = this.generateRefreshToken(decoded.userId);
 
             // Update refresh token in database
-            await prisma.refreshToken.delete({
+            await this.prisma.refreshToken.delete({
                 where: { id: refreshTokenRecord.id }
             });
 
-            await prisma.refreshToken.create({
+            await this.prisma.refreshToken.create({
                 data: {
                     token: newRefreshToken,
                     userId: decoded.userId
@@ -133,32 +140,28 @@ class AuthService {
     }
 
     generateAccessToken(userId: string) {
-        return sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
+        return this.jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
     }
 
     generateRefreshToken(userId: string) {
-        return sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        return this.jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
     }
 
     verifyAccessToken(token: string) {
         try {
-            return verify(token, JWT_SECRET) as { userId: string };
+            return this.jwt.verify(token, JWT_SECRET) as { userId: string };
         } catch (error) {
             return null;
         }
     }
 
     getUserFromToken(token: string) {
-        const decoded = this.verifyAccessToken(token);
-
-        if (!decoded) {
-            throw new Error('Invalid token');
-        }
-
-        return prisma.user.findFirst({
+        const decoded = this.jwt.verify(token, JWT_SECRET) as { userId: string };
+        const getUserByID = this.prisma.user.findFirst({
             where: { id: decoded.userId }
-        });
+        })
+        return getUserByID;
     }
 }
 
-export const authService = new AuthService();
+export default AuthService

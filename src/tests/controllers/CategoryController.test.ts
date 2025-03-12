@@ -1,7 +1,9 @@
 import { Context } from 'hono';
-import { categoryController } from '../../controllers/CategoryController';
-import { categoryService } from '../../services/CategoryService';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
+import { ICategoryService } from '../../entities/CategoryService';
+import CategoryController from '../../controllers/CategoryController';
+import CategoryService from '../../services/CategoryService';
+import { prismaMock } from '../singleton';
 
 // Mock dependencies
 jest.mock('../../services/CategoryService');
@@ -10,6 +12,8 @@ jest.mock('../../utils/apiResponses');
 describe('CategoryController', () => {
     let mockContext: Partial<Context>;
     let mockReq: { json: jest.Mock; query: jest.Mock; param: jest.Mock };
+    let categoryController: CategoryController;
+    let categoryService: ICategoryService;
 
     beforeEach(() => {
         // Reset mocks
@@ -31,6 +35,9 @@ describe('CategoryController', () => {
 
         (successResponse as jest.Mock).mockReturnValue('success');
         (errorResponse as jest.Mock).mockReturnValue('error');
+
+        categoryService = new CategoryService(prismaMock);
+        categoryController = new CategoryController(categoryService);
     });
 
     describe('getAllCategories', () => {

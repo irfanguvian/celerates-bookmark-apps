@@ -1,14 +1,17 @@
 import { Context } from 'hono';
-import { HTTPException } from 'hono/http-exception';
-import { categoryService } from '../services/CategoryService';
 import { errorResponse, successResponse } from '../utils/apiResponses';
+import { ICategoryService } from '../entities/CategoryService';
 
 class CategoryController {
+    categoryService: ICategoryService
+    constructor(categoryService: ICategoryService) {
+        this.categoryService = categoryService;
+    }
     async getAllCategories(c: Context) {
         try {
             const user = await c.get('user');
             const queryParam = c.req.query() as { limit?: number, offset?: number, search?: string };
-            const categories = await categoryService.getAllCategories(user.id, queryParam);
+            const categories = await this.categoryService.getAllCategories(user.id, queryParam);
             return successResponse(c, { categories }, 'Get Categoeries successfully');
         } catch (error) {
             return errorResponse(c, 'Error occurred', error);
@@ -19,7 +22,7 @@ class CategoryController {
         try {
             const user = await c.get('user')
             const body = await c.req.json();
-            const newCategory = await categoryService.createCategory(user.id, body);
+            const newCategory = await this.categoryService.createCategory(user.id, body);
             return successResponse(c, { category: newCategory }, 'Created Categoery successfully');
         } catch (error) {
             return errorResponse(c, 'Error occurred', error);
@@ -32,7 +35,7 @@ class CategoryController {
             const categoryId = c.req.param('id');
             const body = await c.req.json();
 
-            const updatedCategory = await categoryService.updateCategory(user.id, categoryId, body);
+            const updatedCategory = await this.categoryService.updateCategory(user.id, categoryId, body);
 
             return successResponse(c, { category: updatedCategory }, 'updated Categoery successfully');
         } catch (error) {
@@ -45,7 +48,7 @@ class CategoryController {
             const userId = await c.get('user').id;
             const categoryId = c.req.param('id');
 
-            await categoryService.deleteCategory(userId, categoryId);
+            await this.categoryService.deleteCategory(userId, categoryId);
 
             return successResponse(c, {}, 'Delete Category successfully');
         } catch (error) {
@@ -54,4 +57,4 @@ class CategoryController {
     }
 }
 
-export const categoryController = new CategoryController();
+export default CategoryController

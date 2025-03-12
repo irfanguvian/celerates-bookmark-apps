@@ -1,7 +1,9 @@
 import { Context } from 'hono';
-import { authController } from '../../controllers/AuthController';
-import { authService } from '../../services/AuthService';
+import AuthController from '../../controllers/AuthController';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
+import AuthService from '../../services/AuthService';
+import { IAuthService } from '../../entities/AuthService';
+import { prismaMock } from '../singleton';
 
 // Mock dependencies
 jest.mock('../../services/AuthService');
@@ -10,11 +12,11 @@ jest.mock('../../utils/apiResponses');
 describe('AuthController', () => {
     let mockContext: Partial<Context>;
     let mockReq: { json: jest.Mock };
-
+    let controller: AuthController;
+    let authService: IAuthService;
     beforeEach(() => {
         // Reset mocks
         jest.clearAllMocks();
-
         // Mock context and request
         mockReq = { json: jest.fn() };
         mockContext = {
@@ -27,6 +29,9 @@ describe('AuthController', () => {
 
         (successResponse as jest.Mock).mockReturnValue('success');
         (errorResponse as jest.Mock).mockReturnValue('error');
+
+        authService = new AuthService(prismaMock, jest.fn(), jest.fn());
+        controller = new AuthController(authService);
     });
 
     describe('register', () => {
@@ -49,7 +54,7 @@ describe('AuthController', () => {
             (authService.register as jest.Mock).mockResolvedValue(serviceResponse);
 
             // Act
-            const result = await authController.register(mockContext as Context);
+            const result = await controller.register(mockContext as Context);
 
             // Assert
             expect(authService.register).toHaveBeenCalledWith(registerData);
@@ -73,7 +78,7 @@ describe('AuthController', () => {
             (authService.register as jest.Mock).mockRejectedValue(error);
 
             // Act
-            const result = await authController.register(mockContext as Context);
+            const result = await controller.register(mockContext as Context);
 
             // Assert
             expect(errorResponse).toHaveBeenCalledWith(
@@ -102,7 +107,7 @@ describe('AuthController', () => {
             (authService.login as jest.Mock).mockResolvedValue(serviceResponse);
 
             // Act
-            const result = await authController.login(mockContext as Context);
+            const result = await controller.login(mockContext as Context);
 
             // Assert
             expect(authService.login).toHaveBeenCalledWith(loginData);
@@ -126,7 +131,7 @@ describe('AuthController', () => {
             (authService.login as jest.Mock).mockRejectedValue(error);
 
             // Act
-            const result = await authController.login(mockContext as Context);
+            const result = await controller.login(mockContext as Context);
 
             // Assert
             expect(errorResponse).toHaveBeenCalledWith(
@@ -151,7 +156,7 @@ describe('AuthController', () => {
             (authService.refreshToken as jest.Mock).mockResolvedValue(serviceResponse);
 
             // Act
-            const result = await authController.refreshToken(mockContext as Context);
+            const result = await controller.refreshToken(mockContext as Context);
 
             // Assert
             expect(authService.refreshToken).toHaveBeenCalledWith(tokenData.refreshToken);
@@ -172,7 +177,7 @@ describe('AuthController', () => {
             (authService.refreshToken as jest.Mock).mockRejectedValue(error);
 
             // Act
-            const result = await authController.refreshToken(mockContext as Context);
+            const result = await controller.refreshToken(mockContext as Context);
 
             // Assert
             expect(errorResponse).toHaveBeenCalledWith(
@@ -192,7 +197,7 @@ describe('AuthController', () => {
             mockContext.json = jest.fn().mockReturnValue('json-response');
 
             // Act
-            const result = await authController.protectedRoute(mockContext as Context);
+            const result = await controller.protectedRoute(mockContext as Context);
 
             // Assert
             expect(mockContext.get).toHaveBeenCalledWith('user');
