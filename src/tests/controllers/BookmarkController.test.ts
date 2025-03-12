@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
 import BookmarkController from '../../controllers/BookmarkController';
-import { IBookmarkService } from '../../entities/BookmarkService';
+import { IBookmarkService } from '../../entities/BookmarkService.entities';
 import BookmarkService from '../../services/BookmarkService';
 import { prismaMock } from '../singleton';
 

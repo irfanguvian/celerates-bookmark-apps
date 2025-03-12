@@ -1,5 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
-import { BookmarkCreateInput, BookmarkUpdateInput, IBookmarkService, QueryParamBookmarkFilter } from '../entities/BookmarkService';
+import { BookmarkCreateInput, BookmarkUpdateInput, IBookmarkService, QueryParamBookmarkFilter } from '../entities/BookmarkService.entities';
 import { Bookmark, PrismaClient } from '@prisma/client';
 
 class BookmarkService implements IBookmarkService {
@@ -8,21 +8,21 @@ class BookmarkService implements IBookmarkService {
         this.prisma = prisma;
     }
     async getAllBookmarks(userId: string, queryParam: QueryParamBookmarkFilter) {
-        const { limit = 10, offset = 0, search="", categoryId } = queryParam;
+        const { limit = 10, offset = 0, search = "", categoryId } = queryParam;
 
         const whereParam = {
             userId: userId
-        } as { userId: string, title?: { contains: string}, categoryId?: string};
+        } as { userId: string, title?: { contains: string }, categoryId?: string };
 
         if (search && search != "") {
             whereParam.title = { contains: `${search}` };
         }
 
-        if(categoryId) {
+        if (categoryId) {
             whereParam.categoryId = categoryId;
         }
-        
-        const getBookmarks =  this.prisma.bookmark.findMany({
+
+        const getBookmarks = this.prisma.bookmark.findMany({
             where: whereParam,
             include: {
                 category: true,
@@ -69,9 +69,9 @@ class BookmarkService implements IBookmarkService {
                     }
                 }))
             }
-        } as { title: string, description?: string, category: { connect: { id: string } } ,user: { connect: { id: string } }, tags: { create: { tag: { connect: { id: string } } }[] } };
+        } as { title: string, description?: string, category: { connect: { id: string } }, user: { connect: { id: string } }, tags: { create: { tag: { connect: { id: string } } }[] } };
 
-        if(data.categoryId) {
+        if (data.categoryId) {
             createBookmarkArgs.category = {
                 connect: { id: data.categoryId }
             }
@@ -87,7 +87,7 @@ class BookmarkService implements IBookmarkService {
                     }
                 }
             }
-        })  as Bookmark;
+        }) as Bookmark;
 
         return bookmark;
     }

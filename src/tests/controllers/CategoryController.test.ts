@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
-import { ICategoryService } from '../../entities/CategoryService';
+import { ICategoryService } from '../../entities/CategoryService.entities';
 import CategoryController from '../../controllers/CategoryController';
 import CategoryService from '../../services/CategoryService';
 import { prismaMock } from '../singleton';

@@ -1,6 +1,6 @@
 import { Context, MiddlewareHandler } from 'hono'
 import { errorResponse } from '../utils/apiResponses'
-import { IAuthService } from '../entities/AuthService'
+import { IAuthService } from '../entities/AuthService.entities'
 
 export const authMiddleware = (authService: IAuthService): MiddlewareHandler => {
     return async (c: Context, next) => {

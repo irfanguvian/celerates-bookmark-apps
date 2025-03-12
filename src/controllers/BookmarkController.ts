@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { errorResponse, successResponse } from '../utils/apiResponses';
-import { IBookmarkService } from '../entities/BookmarkService';
+import { IBookmarkService } from '../entities/BookmarkService.entities';
 
 class BookmarkController {
     bookmarkService: IBookmarkService;

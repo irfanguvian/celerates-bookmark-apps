@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { errorResponse, successResponse } from '../utils/apiResponses';
-import { ICategoryService } from '../entities/CategoryService';
+import { ICategoryService } from '../entities/CategoryService.entities';
 
 class CategoryController {
     categoryService: ICategoryService

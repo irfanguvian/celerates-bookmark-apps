@@ -2,7 +2,7 @@ import { Context } from 'hono';
 import AuthController from '../../controllers/AuthController';
 import { successResponse, errorResponse } from '../../utils/apiResponses';
 import AuthService from '../../services/AuthService';
-import { IAuthService } from '../../entities/AuthService';
+import { IAuthService } from '../../entities/AuthService.entities';
 import { prismaMock } from '../singleton';
 
 // Mock dependencies

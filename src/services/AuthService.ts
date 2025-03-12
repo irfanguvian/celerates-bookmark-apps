@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IAuthService, LoginRequest, RegisterRequest } from '../entities/AuthService';
+import { IAuthService, LoginRequest, RegisterRequest } from '../entities/AuthService.entities';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secret-refresh';
@@ -25,7 +25,7 @@ class AuthService implements IAuthService {
             throw new Error('User already exists');
         }
 
-        if(userData.password != userData.retypePassword){ 
+        if (userData.password != userData.retypePassword) {
             throw new Error('Passwords do not match');
         }
 

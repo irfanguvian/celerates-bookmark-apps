@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { errorResponse, successResponse } from '../utils/apiResponses';
-import { IAuthService } from '../entities/AuthService';
+import { IAuthService } from '../entities/AuthService.entities';
 
 class AuthController {
     authService: IAuthService;

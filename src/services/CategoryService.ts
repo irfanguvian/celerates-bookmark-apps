@@ -1,5 +1,5 @@
 import { HTTPException } from 'hono/http-exception';
-import { CategoryCreateInput, CategoryUpdateInput, ICategoryService } from '../entities/CategoryService';
+import { CategoryCreateInput, CategoryUpdateInput, ICategoryService } from '../entities/CategoryService.entities';
 import { PrismaClient } from '@prisma/client';
 
 class CategoryService implements ICategoryService {
